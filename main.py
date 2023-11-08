@@ -51,7 +51,8 @@ for destination in destinations_data:
         message = f"Low price alert! Only {flight.best_price}€ to fly "
         message += f"from {flight.from_city}-{flight.from_airport} "
         message += f"to {flight.to_city}-{flight.to_airport}, "
-        message += f"from {flight.out_date} to {flight.return_date}."
+        message += f"from {flight.out_date} to {flight.return_date} "
+        message += f"with {flight.airline}."
         notification.telegram_bot_sendtext(message)
     else:
         print("Price out of budget or no results found\n")

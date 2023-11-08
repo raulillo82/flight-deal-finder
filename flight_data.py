@@ -7,7 +7,8 @@ class FlightData:
                  destination_city,
                  destination_airport,
                  out_date,
-                 return_date):
+                 return_date,
+                 airline):
         self.best_price = price
         self.from_city = origin_city
         self.to_city = destination_city
@@ -15,4 +16,4 @@ class FlightData:
         self.to_airport = destination_airport
         self.out_date = out_date
         self.return_date = return_date
-
+        self.airline = airline

@@ -1,4 +1,4 @@
-from auth import API_KEY_TEQUILA
+from auth import API_KEY_TEQUILA, CLIENT_ID_AMADEUS, CLIENT_SECRET_AMADEUS
 from flight_data import FlightData
 import requests
 
@@ -6,6 +6,33 @@ class FlightSearch:
     #This class is responsible for talking to the Flight Search API.
     def __init__(self):
         pass
+
+    def get_destination_airline(self, iata_code):
+        #AMADEUS TEST API allows 10 requests per user per second
+        url_amadeus_token = "https://test.api.amadeus.com/v1/security/oauth2/token"
+        headers_token_amadeus = {
+                "Content-Type": "application/x-www-form-urlencoded",
+                }
+        query_token = {
+                "grant_type": "client_credentials",
+                "client_id": CLIENT_ID_AMADEUS,
+                "client_secret": CLIENT_SECRET_AMADEUS,
+                }
+        token_amadeus = requests.post(url=url_amadeus_token,
+                                      data=query_token,
+                                      headers=headers_token_amadeus).json()["access_token"]
+        url_amadeus_query = "https://test.api.amadeus.com/v1/reference-data/airlines"
+        headers_amadeus_query = {
+                "Authorization": f"Bearer {token_amadeus}",
+                }
+        query_airline_name = {
+                "airlineCodes": iata_code,
+                }
+        response = requests.get(url=url_amadeus_query,
+                                params=query_airline_name,
+                                headers=headers_amadeus_query).json()
+        airline = response["data"][0]["commonName"].title()#Also check "businessName"
+        return airline
 
     def get_destination_city(self, iata_code):
         url_tequila = "https://api.tequila.kiwi.com"
@@ -61,8 +88,8 @@ class FlightSearch:
                 "date_from": from_date.strftime("%d/%m/%Y"),
                 "date_to": to_date.strftime("%d/%m/%Y"),
                 "flight_type": "round",
-                "nights_in_dst_from": 7,
-                "nights_in_dst_to": 28,
+                "nights_in_dst_from": 2,
+                "nights_in_dst_to": 7,
                 "max_stopovers": 0,
                 "curr": "EUR",
                 #Some other interesting parameters:
@@ -87,6 +114,8 @@ class FlightSearch:
             print(f"No flights found to {city}")
             flight_data = None
         else:
+            airline_name = self.get_destination_airline(
+                    data["route"][0]["airline"])
             flight_data = FlightData(
                     data["price"],
                     data["route"][0]["cityFrom"],
@@ -94,10 +123,12 @@ class FlightSearch:
                     data["route"][0]["cityTo"],
                     data["route"][0]["flyTo"],
                     data["route"][0]["local_departure"].split("T")[0],
-                    data["route"][1]["local_departure"].split("T")[0])
+                    data["route"][1]["local_departure"].split("T")[0],
+                    airline_name)
             print(f"{flight_data.from_city} - "
                   f"{flight_data.to_city}: "
                   f"{flight_data.best_price}€, "
                   f"out on {flight_data.out_date} and "
-                  f"return on {flight_data.return_date}")
+                  f"return on {flight_data.return_date} "
+                  f"with {flight_data.airline}")
         return flight_data
