@@ -2,9 +2,11 @@ from auth import USER_SHEETY, TOKEN_SHEETY
 import requests
 
 PROJECT = "flightDeals"
-SHEET = "price"
+SHEET1 = "price"
+SHEET2 = "user"
 #SHEETY free tier allows 200 request/month, 100 requests/sheet
-url_sheety = f"https://api.sheety.co/{USER_SHEETY}/{PROJECT}/{SHEET}s"
+url_sheety_prices = f"https://api.sheety.co/{USER_SHEETY}/{PROJECT}/{SHEET1}s"
+url_sheety_users = f"https://api.sheety.co/{USER_SHEETY}/{PROJECT}/{SHEET2}s"
 headers_sheety = {
         "Authorization": f"Bearer {TOKEN_SHEETY}",
         }
@@ -28,7 +30,7 @@ class DataManager:
             for city in self.destinations_data:
                 #Mind the singular number of "price"
                 iata_data = {"price": {"iataCode": city["iataCode"]}}
-                url_put = f"{url_sheety}/{city['id']}"
+                url_put = f"{url_sheety_prices}/{city['id']}"
                 response = requests.put(url=url_put,
                                         json=iata_data,
                                         headers=headers_sheety)
@@ -38,7 +40,18 @@ class DataManager:
             print(f"Updating a single city IATA code: {update_city['city']}")
             #Mind the singular number of "price"
             iata_data = {"price": {"iataCode": update_city["iataCode"]}}
-            url_put = f"{url_sheety}/{update_city['id']}"
+            url_put = f"{url_sheety_prices}/{update_city['id']}"
             response = requests.put(url=url_put, json=iata_data,
                                     headers=headers_sheety)
             print(response.text)
+
+    def update_emails(self, fname, lname, email):
+        print(f"Updating names database with {fname}'s email")
+        #Mind the singular number of "price"
+        user_data = {"user": {"firstName": fname,
+                              "lastName": lname,
+                              "email": email,}}
+        url_post = url_sheety_users
+        response = requests.post(url=url_post, json=user_data,
+                                headers=headers_sheety)
+        print(response.text)
