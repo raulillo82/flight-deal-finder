@@ -41,6 +41,8 @@ six_months_from_today = (dt.now()+timedelta(days=180))#.strftime("%d/%m/%Y")
 #Check for flights:
 flight_search = FlightSearch()
 notification = NotificationManager()
+emails_to_list = (input("Send notifications also to mailing list [Y/N]?: ").lower() == "y")
+print(emails_to_list)
 for destination in destinations_data:
     flight = flight_search.check_flights(
             FROM, destination["iataCode"],
@@ -62,6 +64,13 @@ for destination in destinations_data:
         else:
             message += "."
         notification.telegram_bot_sendtext(message)
+        if emails_to_list:
+            emails = [element["email"] for element in data_manager.get_emails()]
+            #names = [element["firstName"] for element in data_manager.get_emails()]
+            mail_message = f"Subject:Cheap flight alert!\n\n"
+            mail_message += message
+            mail_message = mail_message.encode("utf-8")
+            notification.send_email(mail_message, emails)
     else:
         print("Price out of budget or no results found\n")
 

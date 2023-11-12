@@ -15,6 +15,7 @@ class DataManager:
     #This class is responsible for talking to the Google Sheet.
     def __init__(self):
         self.destinations_data = {}
+        self.emails = []
 
     def get_destinations_data(self):
         response = requests.get(url=url_sheety_prices, headers=headers_sheety).json()
@@ -54,3 +55,8 @@ class DataManager:
         response = requests.post(url=url_post, json=user_data,
                                 headers=headers_sheety)
         print(response.text)
+
+    def get_emails(self):
+        response = requests.get(url=url_sheety_users, headers=headers_sheety).json()
+        self.emails = response["users"]
+        return(self.emails)
