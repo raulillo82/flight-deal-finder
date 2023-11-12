@@ -17,8 +17,7 @@ class DataManager:
         self.destinations_data = {}
 
     def get_destinations_data(self):
-        response = requests.get(url=url_sheety,
-                                headers=headers_sheety).json()
+        response = requests.get(url=url_sheety_prices, headers=headers_sheety).json()
 
         self.destinations_data = response["prices"]
         return(self.destinations_data)

@@ -8,7 +8,10 @@ class FlightData:
                  destination_airport,
                  out_date,
                  return_date,
-                 airline):
+                 airline,
+                 stop_overs = 0,
+                 via_city_inbound = "",
+                 via_city_return = "",):
         self.best_price = price
         self.from_city = origin_city
         self.to_city = destination_city
@@ -17,3 +20,6 @@ class FlightData:
         self.out_date = out_date
         self.return_date = return_date
         self.airline = airline
+        self.stop_overs = stop_overs
+        self.via_city_inbound = via_city_inbound
+        self.via_city_return = via_city_return

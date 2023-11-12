@@ -31,7 +31,10 @@ class FlightSearch:
         response = requests.get(url=url_amadeus_query,
                                 params=query_airline_name,
                                 headers=headers_amadeus_query).json()
-        airline = response["data"][0]["commonName"].title()#Also check "businessName"
+        try:
+            airline = response["data"][0]["commonName"].title()#Also check "businessName"
+        except KeyError:
+            airline = f"unknown airline {iata_code}"
         return airline
 
     def get_destination_city(self, iata_code):
@@ -111,8 +114,46 @@ class FlightSearch:
             self.to_city = response.json()["data"][0]["cityTo"]
         except IndexError:
             city = self.get_destination_city(dest_city)
-            print(f"No flights found to {city}")
-            flight_data = None
+            print(f"No direct flights found to {city}")
+            #Check for flights with one hop instead:
+            #flight_data = None
+            query["max_stopovers"] = 2
+            response = requests.get(url=url_get,
+                                    params=query,
+                                    headers=headers_tequila)
+            #Expect IndexError exceptions when no results:
+            try:
+                data = response.json()["data"][0]
+                self.best_price = response.json()["data"][0]["price"]
+                self.from_city = response.json()["data"][0]["cityFrom"]
+                self.to_city = response.json()["data"][0]["cityTo"]
+            except IndexError:
+                city = self.get_destination_city(dest_city)
+                print(f"No flights with one connection found to {city}")
+                flight_data = None
+            else:
+                airline_name = self.get_destination_airline(
+                        data["route"][0]["airline"])
+                flight_data = FlightData(
+                        data["price"],
+                        data["route"][0]["cityFrom"],
+                        data["route"][0]["flyFrom"],
+                        data["route"][1]["cityTo"],
+                        data["route"][1]["flyTo"],
+                        data["route"][0]["local_departure"].split("T")[0],
+                        data["route"][2]["local_departure"].split("T")[0],
+                        airline_name,
+                        2,
+                        data["route"][0]["cityTo"],
+                        data["route"][2]["cityTo"])
+                print(f"{flight_data.from_city} - "
+                      f"{flight_data.to_city}: "
+                      f"{flight_data.best_price}€, "
+                      f"out on {flight_data.out_date} and "
+                      f"return on {flight_data.return_date} "
+                      f"with {flight_data.airline}",
+                      f"via {flight_data.via_city_inbound} inbound",
+                      f"and via {flight_data.via_city_return} return")
         else:
             airline_name = self.get_destination_airline(
                     data["route"][0]["airline"])
@@ -131,4 +172,5 @@ class FlightSearch:
                   f"out on {flight_data.out_date} and "
                   f"return on {flight_data.return_date} "
                   f"with {flight_data.airline}")
+
         return flight_data

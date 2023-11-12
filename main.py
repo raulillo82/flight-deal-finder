@@ -52,7 +52,15 @@ for destination in destinations_data:
         message += f"from {flight.from_city}-{flight.from_airport} "
         message += f"to {flight.to_city}-{flight.to_airport}, "
         message += f"from {flight.out_date} to {flight.return_date} "
-        message += f"with {flight.airline}."
+        message += f"with {flight.airline}"
+        if flight.stop_overs == 2:
+            message += f", via {flight.via_city_inbound}"
+            if flight.via_city_inbound != flight.via_city_return:
+                message += f" inbound and {flight.via_city_return} return."
+            else:
+                message += "."
+        else:
+            message += "."
         notification.telegram_bot_sendtext(message)
     else:
         print("Price out of budget or no results found\n")
