@@ -58,7 +58,7 @@ for destination in destinations_data:
         if flight.stop_overs == 2:
             message += f", via {flight.via_city_inbound}"
             if flight.via_city_inbound != flight.via_city_return:
-                message += f" inbound and {flight.via_city_return} return."
+                message += f" inbound and via {flight.via_city_return} return."
             else:
                 message += "."
         else:
