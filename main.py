@@ -42,7 +42,7 @@ six_months_from_today = (dt.now()+timedelta(days=180))#.strftime("%d/%m/%Y")
 flight_search = FlightSearch()
 notification = NotificationManager()
 emails_to_list = (input("Send notifications also to mailing list [Y/N]?: ").lower() == "y")
-print(emails_to_list)
+
 for destination in destinations_data:
     flight = flight_search.check_flights(
             FROM, destination["iataCode"],
